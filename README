@@ -1,0 +1,65 @@
+NAME
+
+    POE::Component::NetSNMP::agent - AgentX clients with NetSNMP::agent and POE
+
+
+DESCRIPTION
+
+    This module is a thin wrapper around "NetSNMP::agent" to use it within a
+    "POE"-based program.
+
+
+INSTALLATION
+
+    To install this module, run the following commands:
+
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+    Alternatively, to install with Module::Build, you can use the
+    following commands:
+
+        perl Build.PL
+        ./Build
+        ./Build test
+        ./Build install
+
+
+SUPPORT
+
+    You can find documentation for this module with the perldoc command.
+
+        perldoc POE::Component::NetSNMP::agent
+
+    You can also look for information at:
+
+    * RT: CPAN's request tracker (report bugs here)
+        https://rt.cpan.org/Public/Dist/Display.html?Name=POE-Component-NetSNMP-agent
+
+    * AnnoCPAN: Annotated CPAN documentation
+        http://annocpan.org/dist/POE-Component-NetSNMP-agent
+
+    * CPAN Ratings
+        http://cpanratings.perl.org/d/POE-Component-NetSNMP-agent
+
+    * Search CPAN
+        http://search.cpan.org/dist/POE-Component-NetSNMP-agent/
+
+
+AUTHOR
+
+    Sebastien Aperghis-Tramoni "<sebastien at aperghis.net>"
+
+
+LICENSE AND COPYRIGHT
+
+    Copyright 2011 Sebastien Aperghis-Tramoni.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of either: the GNU General Public License as published
+    by the Free Software Foundation; or the Artistic License.
+
+    See http://dev.perl.org/licenses/ for more information.
+
