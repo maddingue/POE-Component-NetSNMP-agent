@@ -129,7 +129,34 @@ Version 0.100
 
 =head1 SYNOPSIS
 
+    POE::Component::NetSNMP::agent->spawn(
+        AgentOID    => "1.3.6.1.4.1.32272",
+        AgentX      => 1,
+        Callback    => \&agent_handler,
+    );
 
+    POE::Kernel->run;
+    exit;
+
+    sub agent_handler {
+        my ($kernel, $heap, $args) = @_[ KERNEL, HEAP, ARG1 ];
+        my ($handler, $reg_info, $request_info, $requests) = @$args;
+
+        # the rest of the code works like a pure NetSNMP::agent callback
+        my $mode = $request_info->getMode;
+
+        for (my $request = $requests; $request; $request = $request->next) {
+            if ($mode == MODE_GET) {
+                # ...
+            }
+            elsif ($mode == MODE_GETNEXT) {
+                # ...
+            }
+            else {
+                # ...
+            }
+        }
+    }
 
 
 =head1 DESCRIPTION
