@@ -4,6 +4,7 @@ META.json
 Build.PL
 Makefile.PL
 README
+README.pod
 Changes
 eg/synopsis-coreref
 eg/synopsis-events
