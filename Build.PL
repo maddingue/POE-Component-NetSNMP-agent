@@ -18,7 +18,7 @@ my $builder = Module::Build->new(
     },
     configure_requires => {
         'Module::Build'     => 0.38,
-    }
+    },
     add_to_cleanup      => [ 'POE-Component-NetSNMP-agent-*' ],
 );
 
