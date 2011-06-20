@@ -18,6 +18,15 @@ WriteMakefile(
         # build/test prereqs
         'Test::More'        => 0,
     },
+    META_MERGE          => {
+        resources       => {
+            repository  => {
+                type    => "git",
+                url     => "git://github.com/maddingue/POE-Component-NetSNMP-agent.git",
+                web     => "https://github.com/maddingue/POE-Component-NetSNMP-agent",
+            }
+        },
+    },
     PL_FILES            => {},
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'POE-Component-NetSNMP-agent-*' },
