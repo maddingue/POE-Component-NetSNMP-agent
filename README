@@ -5,8 +5,8 @@ NAME
 
 DESCRIPTION
 
-    This module is a thin wrapper around "NetSNMP::agent" to use it within a
-    "POE"-based program.
+    This module is a thin wrapper around NetSNMP::agent to use it within a
+    POE-based program.
 
 
 INSTALLATION
@@ -50,7 +50,7 @@ SUPPORT
 
 AUTHOR
 
-    Sebastien Aperghis-Tramoni "<sebastien at aperghis.net>"
+    Sebastien Aperghis-Tramoni <sebastien at aperghis.net>
 
 
 LICENSE AND COPYRIGHT
