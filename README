@@ -27,7 +27,7 @@ INSTALLATION
         ./Build install
 
 
-SUPPORT
+SUPPORT AND DOCUMENTATION
 
     You can find documentation for this module with the perldoc command.
 
@@ -48,12 +48,7 @@ SUPPORT
         http://search.cpan.org/dist/POE-Component-NetSNMP-agent/
 
 
-AUTHOR
-
-    Sebastien Aperghis-Tramoni <sebastien at aperghis.net>
-
-
-LICENSE AND COPYRIGHT
+COPYRIGHT AND LICENSE
 
     Copyright 2011 Sebastien Aperghis-Tramoni.
 
