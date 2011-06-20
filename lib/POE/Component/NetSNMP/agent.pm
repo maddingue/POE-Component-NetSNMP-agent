@@ -7,7 +7,9 @@ use warnings;
 use parent qw< POE::Session >;
 
 use Carp;
+use NetSNMP::agent ();
 use POE;
+use SNMP ();
 
 
 our $VERSION = "0.100";
