@@ -8,6 +8,7 @@ eg/synopsis-events
 lib/POE/Component/NetSNMP/agent.pm
 t/00-load.t
 t/01-api.t
+t/50-run.t
 t/90-pod.t
 t/91-pod-coverage.t
 t/95-manifest.t
