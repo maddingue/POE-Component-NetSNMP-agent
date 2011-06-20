@@ -3,6 +3,8 @@ Build.PL
 Makefile.PL
 README
 Changes
+eg/synopsis-coreref
+eg/synopsis-events
 lib/POE/Component/NetSNMP/agent.pm
 t/00-load.t
 t/90-pod.t
