@@ -9,12 +9,12 @@ use constant {
     AGENT_OID   => "1.3.6.1.4.1.32272",
 };
 
-POE::Component::NetSNMP::agent->spawn(
-    Alias       => "snmp_agent",
-    AgentOID    => AGENT_OID,
-    AgentX      => 1,
-    Callback    => \&agent_handler,
+my $agent = POE::Component::NetSNMP::agent->spawn(
+    Alias   => "snmp_agent",
+    AgentX  => 1,
 );
+
+$agent->register(AGENT_OID, \&agent_handler);
 
 POE::Kernel->run;
 exit;
@@ -23,7 +23,7 @@ sub agent_handler {
     my ($kernel, $heap, $args) = @_[ KERNEL, HEAP, ARG1 ];
     my ($handler, $reg_info, $request_info, $requests) = @$args;
 
-    # the rest of the code works like a pure NetSNMP::agent callback
+    # the rest of the code works like a classic NetSNMP::agent callback
     my $mode = $request_info->getMode;
 
     for (my $request = $requests; $request; $request = $request->next) {

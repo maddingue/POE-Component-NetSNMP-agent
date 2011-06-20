@@ -10,16 +10,14 @@ use constant {
 };
 
 my $agent = POE::Component::NetSNMP::agent->spawn(
-    Alias       => "snmp_agent",
-    AgentOID    => AGENT_OID,
-    AgentX      => 1,
-    Callback    => "agent_handler",
+    Alias   => "snmp_agent",
+    AgentX  => 1,
 );
 
 POE::Session->create(
     inline_states => {
         _start => sub {
-            $_[KERNEL]->post($agent => register => "agent_handler");
+            $_[KERNEL]->post($agent, register => AGENT_OID, "agent_handler");
         },
         agent_handler => \&agent_handler,
     },
@@ -32,7 +30,7 @@ sub agent_handler {
     my ($kernel, $heap, $args) = @_[ KERNEL, HEAP, ARG1 ];
     my ($handler, $reg_info, $request_info, $requests) = @$args;
 
-    # the rest of the code works like a pure NetSNMP::agent callback
+    # the rest of the code works like a classic NetSNMP::agent callback
     my $mode = $request_info->getMode;
 
     for (my $request = $requests; $request; $request = $request->next) {

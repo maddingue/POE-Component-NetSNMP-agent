@@ -4,6 +4,8 @@ use 5.006;
 use strict;
 use warnings;
 
+use parent qw< POE::Session >;
+
 use Carp;
 use POE;
 
@@ -19,22 +21,18 @@ sub spawn {
     croak "error: odd number of arguments" unless @_ % 2 == 0;
 
     my %defaults = (
-        AgentName   => "perl",
-        AgentX      => 0,
+        Name    => "perl",
+        AgentX  => 0,
     );
 
     my %args = ( %defaults, @_ );
 
-    # check for mandatory arguments
-    croak "error: no OID defined"       unless $args{AgentOID};
-    croak "error: no callback defined"  unless $args{Callback};
-    croak "error: callback must be either a POE event name or a coderef"
-        if ref $args{Callback} and ref $args{Callback} ne "CODE";
-    carp "warning: callback '$args{Callback}' doesn't look like a POE event"
-        if !ref $args{Callback} and $args{Callback} !~ /^\w+$/;
+    # check arguments
+    carp "warning: errback '$args{Errback}' doesn't look like a POE event"
+        if $args{Errback} and $args{Errback} !~ /^\w+$/;
 
-
-    POE::Session->create(
+    # create the POE session
+    my $session = $class->create(
         heap => {
             args    => \%args,
         },
@@ -47,46 +45,43 @@ sub spawn {
             },
 
             _stop => sub {
-                $_[HEAP]->{agent}->shutdown;
+                $_[HEAP]{agent}->shutdown;
             },
 
             init => sub {
-                my ($kernel, $heap) = @_[ KERNEL, HEAP ];
-                my $args = $heap->{args};
+                my $args = $_[HEAP]{args};
                 my %opts;
-                $opts{Name}   = $args->{AgentName};
+                $opts{Name}   = $args->{Name};
                 $opts{AgentX} = $args->{AgentX};
-                $opts{Ports}  = $args->{AgentPorts} if defined $args->{AgentPorts};
+                $opts{Ports}  = $args->{Ports} if defined $args->{Ports};
 
                 # create the NetSNMP sub-agent
-                $heap->{agent} = NetSNMP::agent->new(%opts);
-
-                # register the sub-agent
-                $kernel->yield("register") if ref $args->{Callback};
+                $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
             },
 
             register => sub {
-                my ($kernel, $heap, $sender) = @_[ KERNEL, HEAP, SENDER ];
+                my ($kernel, $heap, $sender, $oid, $callback)
+                    = @_[ KERNEL, HEAP, SENDER, ARG0, ARG1 ];
                 my $args = $heap->{args};
 
                 my $poe_wrapper;
 
-                if (ref $args->{Callback}) {
+                if (ref $callback) {
                     # simpler & faster callback mechanism
                     my @poe_params = @_[ 0 .. ARG0-1 ];
                     $poe_wrapper = sub {
                         @_ = ( @poe_params, [], [@_] );
-                        goto $args->{Callback}
+                        goto $callback
                     };
                 }
                 else {
                     # standard POE callback mechanism
-                    $poe_wrapper = $sender->callback($args->{Callback});
+                    $poe_wrapper = $sender->callback($callback);
                 }
 
                 # create & register the NetSNMP sub-agent
                 my $r = $heap->{agent}->register(
-                    $args->{AgentName}, $args->{AgentOID}, $poe_wrapper);
+                    $args->{Name}, $oid, $poe_wrapper);
 
                 if (not $r) {
                     $kernel->post($sender, $args->{Errback}, "register")
@@ -110,6 +105,27 @@ sub spawn {
             },
         },
     );
+
+    return $session
+}
+
+
+#
+# register()
+# --------
+sub register {
+    my ($self, $oid, $callback) = @_;
+
+    # check arguments
+    croak "error: no OID defined"       unless $oid;
+    croak "error: no callback defined"  unless $callback;
+    croak "error: callback must be a coderef"
+        if ref $callback and ref $callback ne "CODE";
+
+    # register the given OID and callback
+    POE::Kernel->post($self, register => $oid, $callback);
+
+    return $self
 }
 
 
@@ -129,11 +145,16 @@ Version 0.100
 
 =head1 SYNOPSIS
 
-    POE::Component::NetSNMP::agent->spawn(
-        AgentOID    => "1.3.6.1.4.1.32272",
-        AgentX      => 1,
-        Callback    => \&agent_handler,
+    use NetSNMP::agent;
+    use POE qw< Component::NetSNMP::agent >;
+
+
+    my $agent = POE::Component::NetSNMP::agent->spawn(
+        Alias   => "snmp_agent",
+        AgentX  => 1,
     );
+
+    $agent->register("1.3.6.1.4.1.32272", \&agent_handler);
 
     POE::Kernel->run;
     exit;
@@ -142,7 +163,7 @@ Version 0.100
         my ($kernel, $heap, $args) = @_[ KERNEL, HEAP, ARG1 ];
         my ($handler, $reg_info, $request_info, $requests) = @$args;
 
-        # the rest of the code works like a pure NetSNMP::agent callback
+        # the rest of the code works like a classic NetSNMP::agent callback
         my $mode = $request_info->getMode;
 
         for (my $request = $requests; $request; $request = $request->next) {
@@ -158,64 +179,124 @@ Version 0.100
         }
     }
 
+See also in F<eg/> for more ready-to-use examples.
+
 
 =head1 DESCRIPTION
 
 This module is a thin wrapper around C<NetSNMP::agent> to use it within
-a C<POE>-based program.
+a C<POE>-based program. Its usage is mostly the same:
+
+=over
+
+=item *
+
+C<spwan> a session object
+
+=item *
+
+C<register> one or more OIDs with associated callbacks (either via the
+object method or via the POE event, as you see fit)
+
+=back
 
 
 =head1 METHODS
 
 =head2 spawn
 
-B<Options>
+Create and return a POE session for handling NetSNMP requests.
+
+B<NetSNMP::agent options>
 
 =over
 
 =item *
 
-C<AgentName>
+C<Name> - I<(optional)> sets the agent name, defaulting to C<"perl">.
+The underlying library will try to read a F<$name.conf> Net-SNMP
+configuration file.
 
 =item *
 
-C<AgentOID>
+C<AgentX> - I<(optional)> be a sub-agent (0 = false, 1 = true).
+The Net-SNMP master agent must be running first.
 
 =item *
 
-C<AgentPorts>
-
-=item *
-
-C<AgentX>
-
-=item *
-
-C<Callback>
-
-=item *
-
-C<Errback>
+C<Ports> - I<(optional)> sets the ports this agent will listen
+on (e.g.: C<"udp:161,tcp:161">).
 
 =back
+
+B<POE options>
+
+=over
+
+=item *
+
+C<Alias> - I<(optional)> sets the session alias
+
+=item *
+
+C<Errback> - I<(optional)> sets the error callback.
+
+=back
+
+B<Example:>
+
+    my $agent = POE::Component::NetSNMP::agent->spawn(
+        Alias   => "snmp_agent",
+        AgentX  => 1,
+    );
+
+
+=head2 register
+
+Register a callback handler for a given OID.
+
+B<Arguments:>
+
+=over
+
+=item 1. I<(mandatory)> OID to register
+
+=item 2. I<(mandatory)> request handler callback; must be a coderef
+
+=back
+
+B<Example:>
+
+    $agent->register("1.3.6.1.4.1.32272.1", \&tree_1_handler);
+    $agent->register("1.3.6.1.4.1.32272.2", \&tree_2_handler);
 
 
 =head1 POE EVENTS
 
 =head2 register
 
+Register a callback handler for a given OID.
+
 B<Arguments:>
 
 =over
 
-=item ARG0: event name for handling the SNMP requests
+=item ARG0: I<(mandatory)> OID to register
+
+=item ARG1: I<(mandatory)> request handler callback; must be an event
+name or a coderef
 
 =back
+
+B<Example:>
+
+    POE::Kernel->post($agent, register => "1.3.6.1.4.1.32272.1", "tree_1_handler");
+    POE::Kernel->post($agent, register => "1.3.6.1.4.1.32272.2", "tree_2_handler");
 
 
 =head1 SEE ALSO
 
-L<POE>
+L<POE>, L<http://poe.perl.org/>
 
 L<NetSNMP::agent>, L<NetSNMP::ASN>, L<NetSNMP::OID>
 
