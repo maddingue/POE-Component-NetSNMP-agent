@@ -59,6 +59,15 @@ sub spawn {
 
                 # create the NetSNMP sub-agent
                 $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
+
+                # find the sockets used to communicate with AgentX master..
+                my ($timeout, @fds) = SNMP::select_info();
+
+                # ... and let POE kernel handle them
+                for my $fd (@fds) {
+                    open my $fh, "+<&=", $fd;
+                    $_[KERNEL]->select_read($fh, "agent_check");
+                }
             },
 
             register => sub {
@@ -89,15 +98,6 @@ sub spawn {
                     $kernel->post($sender, $args->{Errback}, "register")
                         if $args->{Errback};
                     return
-                }
-
-                # find the sockets used to communicate with AgentX master..
-                my ($timeout, @fds) = SNMP::select_info();
-
-                # ... and let POE kernel handle them
-                for my $fd (@fds) {
-                    open my $fh, "+<&=", $fd;
-                    $kernel->select_read($fh, "agent_check");
                 }
             },
 
