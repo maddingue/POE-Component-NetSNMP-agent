@@ -122,7 +122,7 @@ sub register {
     croak "error: no OID defined"       unless $oid;
     croak "error: no callback defined"  unless $callback;
     croak "error: callback must be a coderef"
-        if ref $callback and ref $callback ne "CODE";
+        unless ref $callback and ref $callback eq "CODE";
 
     # register the given OID and callback
     POE::Kernel->post($self, register => $oid, $callback);
