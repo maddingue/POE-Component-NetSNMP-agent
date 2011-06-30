@@ -6,7 +6,7 @@ use POE qw< Component::NetSNMP::agent >;
 
 
 use constant {
-    AGENT_OID   => "1.3.6.1.4.1.32272",
+    BASE_OID   => "1.3.6.1.4.1.32272",
 };
 
 my $agent = POE::Component::NetSNMP::agent->spawn(
@@ -14,7 +14,7 @@ my $agent = POE::Component::NetSNMP::agent->spawn(
     AgentX  => 1,
 );
 
-$agent->register(AGENT_OID, \&agent_handler);
+$agent->register(BASE_OID, \&agent_handler);
 
 POE::Kernel->run;
 exit;
@@ -31,11 +31,11 @@ sub agent_handler {
             $request->setValue(ASN_OCTET_STR, "hello");
         }
         elsif ($mode == MODE_GETNEXT) {
-            $request->setOID(AGENT_OID.".1");
+            $request->setOID(BASE_OID.".1");
             $request->setValue(ASN_OCTET_STR, "hello");
         }
         else {
-            # ...
+            $request->setError($request_info, SNMP_ERR_GENERR);
         }
     }
 }
