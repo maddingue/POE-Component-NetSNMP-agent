@@ -46,9 +46,11 @@ sub spawn {
                     if $_[HEAP]{args}{Alias};
             },
 
+
             _stop => sub {
                 $_[HEAP]{agent}->shutdown;
             },
+
 
             init => sub {
                 my $args = $_[HEAP]{args};
@@ -59,16 +61,8 @@ sub spawn {
 
                 # create the NetSNMP sub-agent
                 $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
-
-                # find the sockets used to communicate with AgentX master..
-                my ($timeout, @fds) = SNMP::select_info();
-
-                # ... and let POE kernel handle them
-                for my $fd (@fds) {
-                    open my $fh, "+<&=", $fd;
-                    $_[KERNEL]->select_read($fh, "agent_check");
-                }
             },
+
 
             register => sub {
                 my ($kernel, $heap, $sender, $oid, $callback)
@@ -99,11 +93,38 @@ sub spawn {
                         if $args->{Errback};
                     return
                 }
+
+                # manually call agent_check_and_process() once so it opens
+                # the sockets to AgentX master
+                $kernel->delay(agent_check => 0, "register");
             },
 
+
             agent_check => sub {
+                my ($kernel, $heap, $case) = @_[ KERNEL, HEAP, ARG0 ];
+
+                SNMP::_check_timeout();
+
                 # process the incoming data and invoque the callback
-                $_[HEAP]{agent}->agent_check_and_process(0);
+                $heap->{agent}->agent_check_and_process(0);
+
+                if ($case eq "register") {
+                    # find the sockets used to communicate with AgentX master..
+                    my ($block, $to_sec, $to_usec, @fd_set)
+                        = SNMP::_get_select_info();
+
+                    # ... and let POE kernel handle them
+                    for my $fd (@fd_set) {
+                        # create a file handle from the given file descriptor
+                        open my $fh, "+<&=", $fd;
+
+                        # first unregister the given file handles from
+                        # POE::Kernel, in case some were already registered,
+                        # then register them, with this event as callback
+                        $kernel->select_read($fh);
+                        $kernel->select_read($fh, "agent_check");
+                    }
+                }
             },
         },
     );
