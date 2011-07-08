@@ -40,97 +40,129 @@ sub spawn {
         },
 
         inline_states => {
-            _start => sub {
-                $_[KERNEL]->yield("init");
-                $_[KERNEL]->alias_set( $_[HEAP]{args}{Alias} )
-                    if $_[HEAP]{args}{Alias};
-            },
-
-
-            _stop => sub {
-                $_[HEAP]{agent}->shutdown;
-            },
-
-
-            init => sub {
-                my $args = $_[HEAP]{args};
-                my %opts;
-                $opts{Name}   = $args->{Name};
-                $opts{AgentX} = $args->{AgentX};
-                $opts{Ports}  = $args->{Ports} if defined $args->{Ports};
-
-                # create the NetSNMP sub-agent
-                $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
-            },
-
-
-            register => sub {
-                my ($kernel, $heap, $sender, $oid, $callback)
-                    = @_[ KERNEL, HEAP, SENDER, ARG0, ARG1 ];
-                my $args = $heap->{args};
-
-                my $poe_wrapper;
-
-                if (ref $callback) {
-                    # simpler & faster callback mechanism
-                    my @poe_params = @_[ 0 .. ARG0-1 ];
-                    $poe_wrapper = sub {
-                        @_ = ( @poe_params, [], [@_] );
-                        goto $callback
-                    };
-                }
-                else {
-                    # standard POE callback mechanism
-                    $poe_wrapper = $sender->callback($callback);
-                }
-
-                # create & register the NetSNMP sub-agent
-                my $r = $heap->{agent}->register(
-                    $args->{Name}, $oid, $poe_wrapper);
-
-                if (not $r) {
-                    $kernel->post($sender, $args->{Errback}, "register")
-                        if $args->{Errback};
-                    return
-                }
-
-                # manually call agent_check_and_process() once so it opens
-                # the sockets to AgentX master
-                $kernel->delay(agent_check => 0, "register");
-            },
-
-
-            agent_check => sub {
-                my ($kernel, $heap, $case) = @_[ KERNEL, HEAP, ARG0 ];
-
-                SNMP::_check_timeout();
-
-                # process the incoming data and invoque the callback
-                $heap->{agent}->agent_check_and_process(0);
-
-                if ($case eq "register") {
-                    # find the sockets used to communicate with AgentX master..
-                    my ($block, $to_sec, $to_usec, @fd_set)
-                        = SNMP::_get_select_info();
-
-                    # ... and let POE kernel handle them
-                    for my $fd (@fd_set) {
-                        # create a file handle from the given file descriptor
-                        open my $fh, "+<&=", $fd;
-
-                        # first unregister the given file handles from
-                        # POE::Kernel, in case some were already registered,
-                        # then register them, with this event as callback
-                        $kernel->select_read($fh);
-                        $kernel->select_read($fh, "agent_check");
-                    }
-                }
-            },
+            _start      => \&ev_start,
+            _stop       => \&ev_stop,
+            init        => \&ev_init,
+            register    => \&ev_register,
+            agent_check => \&ev_agent_check,
         },
     );
 
     return $session
 }
+
+
+# ==============================================================================
+# POE events
+#
+
+
+#
+# ev_start()
+# --------
+sub ev_start {
+    $_[KERNEL]->yield("init");
+    $_[KERNEL]->alias_set( $_[HEAP]{args}{Alias} )
+        if $_[HEAP]{args}{Alias};
+}
+
+
+#
+# ev_stop()
+# -------
+sub ev_stop {
+    $_[HEAP]{agent}->shutdown;
+}
+
+
+#
+# ev_init()
+# -------
+sub ev_init {
+    my $args = $_[HEAP]{args};
+    my %opts;
+    $opts{Name}   = $args->{Name};
+    $opts{AgentX} = $args->{AgentX};
+    $opts{Ports}  = $args->{Ports} if defined $args->{Ports};
+
+    # create the NetSNMP sub-agent
+    $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
+}
+
+
+#
+# ev_register()
+# -----------
+sub ev_register {
+    my ($kernel, $heap, $sender, $oid, $callback)
+        = @_[ KERNEL, HEAP, SENDER, ARG0, ARG1 ];
+    my $args = $heap->{args};
+
+    my $poe_wrapper;
+
+    if (ref $callback) {
+        # simpler & faster callback mechanism
+        my @poe_params = @_[ 0 .. ARG0-1 ];
+        $poe_wrapper = sub {
+            @_ = ( @poe_params, [], [@_] );
+            goto $callback
+        };
+    }
+    else {
+        # standard POE callback mechanism
+        $poe_wrapper = $sender->callback($callback);
+    }
+
+    # create & register the NetSNMP sub-agent
+    my $r = $heap->{agent}->register(
+        $args->{Name}, $oid, $poe_wrapper);
+
+    if (not $r) {
+        $kernel->post($sender, $args->{Errback}, "register")
+            if $args->{Errback};
+        return
+    }
+
+    # manually call agent_check_and_process() once so it opens
+    # the sockets to AgentX master
+    $kernel->delay(agent_check => 0, "register");
+}
+
+
+#
+# ev_agent_check()
+# --------------
+sub ev_agent_check {
+    my ($kernel, $heap, $case) = @_[ KERNEL, HEAP, ARG0 ];
+
+    SNMP::_check_timeout();
+
+    # process the incoming data and invoque the callback
+    $heap->{agent}->agent_check_and_process(0);
+
+    if ($case eq "register") {
+        # find the sockets used to communicate with AgentX master..
+        my ($block, $to_sec, $to_usec, @fd_set)
+            = SNMP::_get_select_info();
+
+        # ... and let POE kernel handle them
+        for my $fd (@fd_set) {
+            # create a file handle from the given file descriptor
+            open my $fh, "+<&=", $fd;
+
+            # first unregister the given file handles from
+            # POE::Kernel, in case some were already registered,
+            # then register them, with this event as callback
+            $kernel->select_read($fh);
+            $kernel->select_read($fh, "agent_check");
+        }
+    }
+}
+
+
+# ==============================================================================
+# Methods
+#
 
 
 #
@@ -150,6 +182,7 @@ sub register {
 
     return $self
 }
+
 
 
 __PACKAGE__
