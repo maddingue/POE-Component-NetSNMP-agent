@@ -347,6 +347,16 @@ sub by_oid ($$) {
 }
 
 
+# ==============================================================================
+# Hackery
+#
+
+{   # live-patch NetSNMP::OID
+    package NetSNMP::OID;
+    sub as_oid { return join ".", "", $_[0]->to_array }
+}
+
+
 __PACKAGE__
 
 __END__
