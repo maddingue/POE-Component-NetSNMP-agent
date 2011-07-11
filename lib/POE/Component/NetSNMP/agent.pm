@@ -386,6 +386,8 @@ Version 0.100
 
 =head1 SYNOPSIS
 
+Like a traditional C<NetSNMP::agent>, made POE aware:
+
     use NetSNMP::agent;
     use POE qw< Component::NetSNMP::agent >;
 
@@ -418,6 +420,37 @@ Version 0.100
                 # ...
             }
         }
+    }
+
+Even simpler, let the module do all the stupid work:
+
+    use NetSNMP::ASN;
+    use POE qw< Component::NetSNMP::agent >;
+
+
+    POE::Session->create(
+        inline_states => {
+            _start => sub {
+                $_[HEAP]{agent} = POE::Component::NetSNMP::agent->spawn(
+                    Alias       => "snmp_agent",
+                    AgentX      => 1,
+                    AutoHandle  => "1.3.6.1.4.1.32272",
+                );
+
+                $_[KERNEL]->yield("update_tree");
+            },
+            update_tree => \&update_tree,
+        },
+    );
+
+    POE::Kernel->run;
+    exit;
+
+    sub update_tree {
+        my ($kernel, $heap) = @_[ KERNEL, HEAP ];
+
+        # populate the OID tree at regular intervals with
+        # add_oid_entry and add_oid_tree
     }
 
 See also in F<eg/> for more ready-to-use examples.
