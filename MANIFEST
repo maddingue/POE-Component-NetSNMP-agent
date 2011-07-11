@@ -6,6 +6,7 @@ Makefile.PL
 README
 README.pod
 Changes
+eg/synopsis-autohandle
 eg/synopsis-coreref
 eg/synopsis-events
 lib/POE/Component/NetSNMP/agent.pm
