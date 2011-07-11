@@ -188,7 +188,6 @@ sub ev_tree_handler {
     my ($handler, $reg_info, $request_info, $requests) = @$args;
     my $oid_tree = $heap->{oid_tree};
     my $oid_list = $heap->{oid_list};
-    my $now = time;
 
     # the rest of the code works like a classic NetSNMP::agent callback
     my $mode = $request_info->getMode;
