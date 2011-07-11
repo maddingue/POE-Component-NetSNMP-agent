@@ -400,20 +400,20 @@ See also in F<eg/> for more ready-to-use examples.
 =head1 DESCRIPTION
 
 This module is a thin wrapper around C<NetSNMP::agent> to use it within
-a C<POE>-based program. Its usage is mostly the same:
+a POE-based program, its basic use being the same as you would do
+without POE: C<register> one or more OIDs with their associated callbacks.
 
-=over
+C<POE::Component::NetSNMP::agent> also provides a simpler mechanism,
+similar to C<SNMP::Extension::PassPersist>, if you just want to handle
+C<get> and C<getnext> requests over an OID tree: set the C<Autohandle>
+option to the a OID, then add OID entries with C<add_oid_entry> or
+C<add_oid_tree>.
 
-=item *
+Note that most of the API is available both as POE events and as object
+methods.
 
-C<spwan> a session object
-
-=item *
-
-C<register> one or more OIDs with associated callbacks (either via the
-object method or via the POE event, as you see fit)
-
-=back
+This module can use C<Sort::Key::OID> when it is available, for sorting
+OIDs faster than with the internal pure Perl function.
 
 
 =head1 METHODS
