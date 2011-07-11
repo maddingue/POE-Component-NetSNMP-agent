@@ -11,9 +11,11 @@ WriteMakefile(
     ABSTRACT_FROM       => 'lib/POE/Component/NetSNMP/agent.pm',
     PREREQ_PM => {
         # prereqs
+        'List::MoreUtils'   => 0.07,
         'NetSNMP::agent'    => 5.0000,
         'POE'               => 0.3502,
         'SNMP'              => 5.0000,
+        'version'           => 0,
 
         # build/test prereqs
         'Test::More'        => 0,
