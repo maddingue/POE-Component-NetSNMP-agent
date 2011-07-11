@@ -39,6 +39,10 @@ sub spawn {
 
     my %args = ( %defaults, @_ );
 
+    my @poe_opts;
+    push @poe_opts, options => { trace => 1, debug => 1, default => 1 }
+        if $args{Debug};
+
     # check arguments
     carp "warning: errback '$args{Errback}' doesn't look like a POE event"
         if $args{Errback} and $args{Errback} !~ /^\w+$/;
@@ -60,6 +64,8 @@ sub spawn {
             add_oid_entry   => \&ev_add_oid_entry,
             add_oid_tree    => \&ev_add_oid_tree,
         },
+
+        @poe_opts,
     );
 
     return $session
@@ -455,6 +461,10 @@ C<Alias> - I<(optional)> sets the session alias
 
 C<AutoHandle> - I<(optional)> sets the component to auto-handle C<get>
 and C<getnext> request to the given OID
+
+=item *
+
+C<Debug> - I<(optional)> when true, enables debug mode on this session
 
 =item *
 
