@@ -524,7 +524,13 @@ B<Arguments:>
 
 =over
 
-=item 1. I<(mandatory)> OID tree
+=item 1. I<(mandatory)> OID tree; must be a hashref with the following
+structure:
+
+    {
+        OID => [ ASN_TYPE, VALUE ],
+        ...
+    }
 
 =back
 
@@ -596,7 +602,13 @@ B<Arguments:>
 
 =over
 
-=item ARG0: I<(mandatory)> OID tree
+=item ARG0: I<(mandatory)> OID tree; must be a hashref with the following
+structure:
+
+    {
+        OID => [ ASN_TYPE, VALUE ],
+        ...
+    }
 
 =back
 
