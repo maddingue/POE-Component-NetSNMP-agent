@@ -11,6 +11,7 @@ use List::MoreUtils qw< after >;
 use NetSNMP::agent;
 use POE;
 use SNMP ();
+use version ();
 
 
 our $VERSION = "0.100";
@@ -22,6 +23,10 @@ use constant {
 
     HAVE_SORT_KEY_OID
                     => eval "use Sort::Key::OID 0.04 'oidsort'; 1" ? 1 : 0,
+
+    BUGGY_NETSNMP_AGENT => eval {
+        version->new($NetSNMP::agent::VERSION) < version->new("5.04")
+    },
 };
 
 
@@ -220,6 +225,7 @@ sub ev_tree_handler {
             if (exists $oid_tree->{$next_oid}) {
                 my $type  = $oid_tree->{$next_oid}[TYPE];
                 my $value = $oid_tree->{$next_oid}[VALUE];
+                $value = "$value" if BUGGY_NETSNMP_AGENT;
                 $request->setOID($next_oid);
                 $request->setValue($type, $value);
             }
