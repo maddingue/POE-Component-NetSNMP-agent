@@ -1,5 +1,11 @@
 Revision history for POE-Component-NetSNMP-agent
 
+0.200   2011.07.11  (SAPER)
+        [BUGFIX] Rework the way communication sockets are managed to make
+        the module work with NetSNMP::agent 5.4
+        [FEATURE] Added Autohandle option, to provide an easy-to-use API
+        a la SNMP::Extension::PassPersist.
+
 0.100   2011.06.20  (SAPER)
         First version released.
 
