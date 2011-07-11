@@ -109,7 +109,7 @@ sub ev_init {
     $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
 
     # if auto-handle is requested, register our own OID tree handler
-    $_[KERNEL]->yield(register => $args->{AutoHandle}, "tree_handler");
+    $_[KERNEL]->yield(register => $args->{AutoHandle}, "tree_handler")
         if $args->{AutoHandle};
 }
 
