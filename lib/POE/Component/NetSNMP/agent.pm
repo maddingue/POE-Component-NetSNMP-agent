@@ -248,8 +248,7 @@ sub ev_add_oid_entry {
 # ev_add_oid_tree()
 # ---------------
 sub ev_add_oid_tree {
-    my ($kernel, $heap, $new_tree)
-        = @_[ KERNEL, HEAP, ARG0, ARG1, ARG2 ];
+    my ($kernel, $heap, $new_tree) = @_[ KERNEL, HEAP, ARG0 ];
 
     my $oid_tree = $heap->{oid_tree};
 
