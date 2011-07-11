@@ -101,6 +101,12 @@ sub ev_init {
 
     # create the NetSNMP sub-agent
     $_[HEAP]{agent} = NetSNMP::agent->new(%opts);
+
+    # if auto-handle is requested, register our own OID tree handler
+    if ($args->{AutoHandle}) {
+        my $callback = $_[SESSION]->callback("tree_handler");
+        $_[HEAP]{agent}->register($args->{Name}, $args->{AutoHandle}, $callback);
+    }
 }
 
 
@@ -438,13 +444,18 @@ on (e.g.: C<"udp:161,tcp:161">).
 
 =back
 
-B<POE options>
+B<Component options>
 
 =over
 
 =item *
 
 C<Alias> - I<(optional)> sets the session alias
+
+=item *
+
+C<AutoHandle> - I<(optional)> sets the component to auto-handle C<get>
+and C<getnext> request to the given OID
 
 =item *
 
@@ -482,7 +493,7 @@ B<Example:>
 
 =head2 add_oid_entry
 
-Add an OID entry to be served by the agent.
+Add an OID entry to be auto-handled by the agent.
 
 B<Arguments:>
 
@@ -507,7 +518,7 @@ B<Example:>
 
 =head2 add_oid_tree
 
-Merge an OID tree to the main OID tree.
+Add multiple OID entries to be auto-handled by the agent.
 
 B<Arguments:>
 
@@ -553,7 +564,7 @@ B<Example:>
 
 =head2 add_oid_entry
 
-Add an OID entry to be served by the agent.
+Add an OID entry to be auto-handled by the agent.
 
 B<Arguments:>
 
@@ -579,7 +590,7 @@ B<Example:>
 
 =head2 add_oid_tree
 
-Merge an OID tree to the main OID tree.
+Add multiple OID entries to be auto-handled by the agent.
 
 B<Arguments:>
 
