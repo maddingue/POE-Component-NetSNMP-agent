@@ -245,6 +245,9 @@ sub ev_add_oid_entry {
 
     my $oid_tree = $heap->{oid_tree};
 
+    # make sure that the OID start with a dot
+    $oid = ".$oid" unless index($oid, ".") == 0;
+
     # add the given entry to the tree
     $oid_tree->{$oid} = [ $type, $value ];
 
@@ -262,8 +265,11 @@ sub ev_add_oid_tree {
 
     my $oid_tree = $heap->{oid_tree};
 
+    # make sure that the OIDs start with a dot
+    my @oids = map { ".$_" unless index($_, ".") == 0 } keys %$new_tree;
+
     # add the given entries to the tree
-    @{$oid_tree}{keys %$new_tree} = values %$new_tree;
+    @{$oid_tree}{@oids} = values %$new_tree;
 
     # calculate the sorted list of OID entries
     @{ $heap->{oid_list} } = HAVE_SORT_KEY_OID ?
