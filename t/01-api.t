@@ -12,7 +12,7 @@ my @class_methods = qw<
     spawn
 >;
 my @object_methods = qw<
-    register
+    register  add_oid_entry  add_oid_tree
 >;
 
 my $tests = 1 + @functions + @class_methods
