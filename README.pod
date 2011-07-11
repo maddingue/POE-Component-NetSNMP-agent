@@ -5,8 +5,21 @@ POE::Component::NetSNMP::agent - AgentX clients with NetSNMP::agent and POE
 
 =head1 DESCRIPTION
 
-This module is a thin wrapper around NetSNMP::agent to use it within a
-POE-based program.
+This module is a thin wrapper around C<NetSNMP::agent> to use it within
+a POE-based program, its basic use being the same as you would do
+without POE: C<register> one or more OIDs with their associated callbacks.
+
+C<POE::Component::NetSNMP::agent> also provides a simpler mechanism,
+similar to C<SNMP::Extension::PassPersist>, if you just want to handle
+C<get> and C<getnext> requests over an OID tree: set the C<Autohandle>
+option to the a OID, then add OID entries with C<add_oid_entry> or
+C<add_oid_tree>.
+
+Note that most of the API is available both as POE events and as object
+methods.
+
+This module can use C<Sort::Key::OID> when it is available, for sorting
+OIDs faster than with the internal pure Perl function.
 
 
 =head1 INSTALLATION
