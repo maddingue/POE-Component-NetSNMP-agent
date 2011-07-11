@@ -50,7 +50,8 @@ sub spawn {
     # create the POE session
     my $session = $class->create(
         heap => {
-            args    => \%args,
+            args        => \%args,
+            oid_tree    => {},
         },
 
         inline_states => {
