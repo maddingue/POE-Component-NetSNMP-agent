@@ -466,7 +466,9 @@ See also in F<eg/> for more ready-to-use examples.
 
 This module is a thin wrapper around C<NetSNMP::agent> to use it within
 a POE-based program, its basic use being the same as you would do
-without POE: C<register> one or more OIDs with their associated callbacks.
+without POE: C<register> one or more OIDs with their associated callbacks,
+then within a callback process & answer the requests with C<setValue()>,
+C<setOID()>, C<setError()>, etc.
 
 C<POE::Component::NetSNMP::agent> also provides a simpler mechanism,
 similar to C<SNMP::Extension::PassPersist>, if you just want to handle
