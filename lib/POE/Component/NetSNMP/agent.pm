@@ -479,7 +479,8 @@ AgentX master (see the C<Ping> option), but you can force a check by
 C<post>ing to C<agent_check>;
 
 Note that most of the API is available both as POE events and as object
-methods.
+methods, in an attempt to make it a bit easier for people not fully used
+to POE.
 
 This module can use C<Sort::Key::OID> when it is available, for sorting
 OIDs faster than with the internal pure Perl function.
