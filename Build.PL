@@ -11,6 +11,7 @@ my $builder = Module::Build->new(
     requires => {
         'List::MoreUtils'   => 0.07,
         'NetSNMP::agent'    => 5.0000,
+        'parent'            => 0,
         'POE'               => 0.3502,
         'SNMP'              => 5.0000,
         'version'           => 0,

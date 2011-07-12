@@ -1,5 +1,7 @@
 Revision history for POE-Component-NetSNMP-agent
 
+        [DIST] Add missing prereq parent.pm
+
 0.200   2011.07.11  (SAPER)
         [BUGFIX] Rework the way communication sockets are managed to make
         the module work with NetSNMP::agent 5.4
