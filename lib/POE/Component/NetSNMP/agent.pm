@@ -40,6 +40,7 @@ sub spawn {
     my %defaults = (
         Name    => "perl",
         AgentX  => 0,
+        Ping    => 10,
     );
 
     my %args = ( %defaults, @_ );
@@ -57,6 +58,7 @@ sub spawn {
         heap => {
             args        => \%args,
             oid_tree    => {},
+            ping_delay  => $args{Ping},
         },
 
         inline_states => {
@@ -165,9 +167,13 @@ sub ev_register {
 sub ev_agent_check {
     my ($kernel, $heap, $case) = @_[ KERNEL, HEAP, ARG0 ];
 
-    SNMP::_check_timeout();
+    $case ||= "";
+
+    # schedule next check
+    $kernel->delay(agent_check => $heap->{ping_delay}),
 
     # process the incoming data and invoque the callback
+    SNMP::_check_timeout();
     $heap->{agent}->agent_check_and_process(0);
 
     if ($case eq "register") {
@@ -468,6 +474,10 @@ C<get> and C<getnext> requests over an OID tree: set the C<Autohandle>
 option to the a OID, then add OID entries with C<add_oid_entry> or
 C<add_oid_tree>.
 
+The module will try to automatically recover from a lost connection with
+AgentX master (see the C<Ping> option), but you can force a check by
+C<post>ing to C<agent_check>;
+
 Note that most of the API is available both as POE events and as object
 methods.
 
@@ -519,6 +529,11 @@ and C<getnext> request to the given OID
 =item *
 
 C<Debug> - I<(optional)> when true, enables debug mode on this session
+
+=item *
+
+C<Ping> - I<(optional)> sets the ping delay between manual agent checks
+in seconds; default is 10 seconds
 
 =item *
 
