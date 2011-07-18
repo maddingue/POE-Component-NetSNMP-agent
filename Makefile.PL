@@ -23,11 +23,12 @@ WriteMakefile(
     },
     META_MERGE          => {
         resources       => {
-            repository  => {
-                type    => "git",
-                url     => "git://github.com/maddingue/POE-Component-NetSNMP-agent.git",
-                web     => "https://github.com/maddingue/POE-Component-NetSNMP-agent",
-            }
+            repository  => "https://github.com/maddingue/POE-Component-NetSNMP-agent",
+            #{
+            #    type    => "git",
+            #    url     => "git://github.com/maddingue/POE-Component-NetSNMP-agent.git",
+            #    web     => "https://github.com/maddingue/POE-Component-NetSNMP-agent",
+            #}
         },
     },
     PL_FILES            => {},
