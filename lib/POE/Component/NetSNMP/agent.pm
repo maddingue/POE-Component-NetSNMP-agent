@@ -14,7 +14,7 @@ use SNMP ();
 use version ();
 
 
-our $VERSION = "0.200";
+our $VERSION = "0.300";
 
 
 use constant {
