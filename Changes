@@ -1,5 +1,7 @@
 Revision history for POE-Component-NetSNMP-agent
 
+        [BUGFIX] Correctly work around an old NetSNMP::agent bug in GET mode.
+
 0.300   2011.07.18  (SAPER)
         [FEATURE] Added Ping option to automatically recover from a lost
         connection with the AgentX master.

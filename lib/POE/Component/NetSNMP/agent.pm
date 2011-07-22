@@ -215,6 +215,7 @@ sub ev_tree_handler {
             if (exists $oid_tree->{$oid}) {
                 my $type  = $oid_tree->{$oid}[TYPE];
                 my $value = $oid_tree->{$oid}[VALUE];
+                $value = "$value" if BUGGY_NETSNMP_AGENT;
                 $request->setValue($type, $value);
             }
             else {
