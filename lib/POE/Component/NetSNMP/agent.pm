@@ -293,6 +293,74 @@ sub ev_add_oid_tree {
 
 
 #
+# new()
+# ---
+sub new {
+    my $class = shift;
+    croak "error: odd number of arguments" unless @_ % 2 == 0;
+
+    my %args = @_;
+    my $update_handlers = delete $args{AutoUpdate};
+    carp "warning: no OID tree update handlers defined"
+        unless $update_handlers;
+
+    # instanciate ourself
+    my $self = POE::Component::NetSNMP::agent->spawn(%args);
+
+    # create a heap reserved for the update handlers
+    $self->[0]{update_handlers_heap} = {};
+
+    # create the states for wrapping around the update handlers
+    my %state;
+    for my $def (@$update_handlers) {
+        my ($coderef, $delay) = @$def;
+        my $name = "wrap_sub_$coderef";
+
+        $state{$name} = sub {
+            $_[KERNEL]->delay($name, $delay);
+            eval { $coderef->($self) };
+            warn $@ if $@;
+        };
+    }
+
+    # create the additional session to execute the update handlers
+    POE::Session->create(
+        heap => {
+            agent   => $self,
+        },
+
+        args => [ keys %state ],
+
+        inline_states => {
+            _start => sub {
+                $_[KERNEL]->alias_set("main");
+                $_[KERNEL]->yield($_) for @_[ARG0 .. $#_];
+            },
+            %state,
+        },
+    );
+
+    return $self
+}
+
+
+#
+# run()
+# ---
+sub run {
+    POE::Kernel->run;
+}
+
+
+#
+# heap()
+# ----
+sub heap {
+    $_[0][0]{update_handlers_heap}
+}
+
+
+#
 # register()
 # --------
 sub register {
@@ -427,7 +495,7 @@ Like a traditional C<NetSNMP::agent>, made POE aware:
         }
     }
 
-Even simpler, let the module do all the stupid work:
+Simpler, let the module do the boring stuff, but keep control of the loop:
 
     use NetSNMP::ASN;
     use POE qw< Component::NetSNMP::agent >;
@@ -455,7 +523,28 @@ Even simpler, let the module do all the stupid work:
         my ($kernel, $heap) = @_[ KERNEL, HEAP ];
 
         # populate the OID tree at regular intervals with
-        # add_oid_entry and add_oid_tree
+        # the add_oid_entry and add_oid_tree events
+    }
+
+Even simpler, let the module do all the boring stuff, leaving you nothing
+more to do than providing the handlers to update the OID trees:
+
+    use NetSNMP::ASN;
+    use POE::Component::NetSNMP::agent;
+
+    my $agent = POE::Component::NetSNMP::agent->new(
+        AgentX      => 1,
+        AutoHandle  => "1.3.6.1.4.1.32272",
+        AutoUpdate  => [[ \&update_tree, 30 ]],
+    );
+
+    $agent->run;
+
+    sub update_tree {
+        my ($self) = @_;
+
+        # populate the OID tree with the add_oid_entry() and add_oid_tree()
+        # methods, a la SNMP::Extension::PassPersist
     }
 
 See also in F<eg/> for more ready-to-use examples.
@@ -549,6 +638,52 @@ B<Example:>
         Alias   => "snmp_agent",
         AgentX  => 1,
     );
+
+
+=head2 new
+
+Simpler constructor: create all the POE sessions and events to handle
+absolutely all the boring stuff; just provide handlers to update the
+OID trees. Accept the same arguments than C<span> plus the following:
+
+=over
+
+=item *
+
+C<AutoUpdate> - expects a definition of handlers and their respective
+delay (in seconds) in the form of an array of arrays:
+
+    AutoUpdate => [
+        [ CODEREF, DELAY ],
+        ...
+    ],
+
+=back
+
+B<Examples:>
+
+    # create an agent with a single handler, called every 30 sec
+    my $agent = POE::Component::NetSNMP::agent->new(
+        AgentX      => 1,
+        AutoHandle  => "1.3.6.1.4.1.32272",
+        AutoUpdate  => [[ \&update_tree, 30 ]],
+    );
+
+    # create an agent with two handlers, called respectively
+    # every 10 and every 20 seconds
+    my $agent = POE::Component::NetSNMP::agent->new(
+        AgentX      => 1,
+        AutoHandle  => "1.3.6.1.4.1.32272",
+        AutoUpdate  => [
+            [ \&update_tree_1, 10 ],
+            [ \&update_tree_2, 20 ],
+        ],
+    );
+
+
+=head2 run
+
+Run the main loop (executes C<< POE::Kernel->run >>)
 
 
 =head2 register
