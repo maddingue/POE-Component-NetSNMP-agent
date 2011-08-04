@@ -1,6 +1,8 @@
 Revision history for POE-Component-NetSNMP-agent
 
-        [BUGFIX] Correctly work around an old NetSNMP::agent bug in GET mode.
+        [BUGFIX] Work around a bad interaction between the way Perl handles
+        lexicals and the way NetSNMP::agent's setValue() tries to handle more
+        than one type of value.
 
 0.300   2011.07.18  (SAPER)
         [FEATURE] Added Ping option to automatically recover from a lost

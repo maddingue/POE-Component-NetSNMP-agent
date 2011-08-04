@@ -11,7 +11,6 @@ use List::MoreUtils qw< after >;
 use NetSNMP::agent;
 use POE;
 use SNMP ();
-use version ();
 
 
 our $VERSION = "0.300";
@@ -23,10 +22,6 @@ use constant {
 
     HAVE_SORT_KEY_OID
                     => eval "use Sort::Key::OID 0.04 'oidsort'; 1" ? 1 : 0,
-
-    BUGGY_NETSNMP_AGENT => eval {
-        version->new($NetSNMP::agent::VERSION) < version->new("5.04")
-    },
 };
 
 
@@ -213,10 +208,11 @@ sub ev_tree_handler {
 
         if ($mode == MODE_GET) {
             if (exists $oid_tree->{$oid}) {
-                my $type  = $oid_tree->{$oid}[TYPE];
-                my $value = $oid_tree->{$oid}[VALUE];
-                $value = "$value" if BUGGY_NETSNMP_AGENT;
-                $request->setValue($type, $value);
+                # /!\ no intermediate vars. see comment at end
+                $request->setValue(
+                    $oid_tree->{$oid}[TYPE],
+                    $oid_tree->{$oid}[VALUE]
+                );
             }
             else {
                 $request->setError($request_info, SNMP_ERR_NOSUCHNAME);
@@ -230,11 +226,12 @@ sub ev_tree_handler {
             $next_oid ||= @$oid_list[0] unless exists $oid_tree->{$oid};
 
             if (exists $oid_tree->{$next_oid}) {
-                my $type  = $oid_tree->{$next_oid}[TYPE];
-                my $value = $oid_tree->{$next_oid}[VALUE];
-                $value = "$value" if BUGGY_NETSNMP_AGENT;
+                # /!\ no intermediate vars. see comment at end
                 $request->setOID($next_oid);
-                $request->setValue($type, $value);
+                $request->setValue(
+                    $oid_tree->{$next_oid}[TYPE],
+                    $oid_tree->{$next_oid}[VALUE]
+                );
             }
             else {
                 $request->setError($request_info, SNMP_ERR_NOSUCHNAME);
@@ -774,4 +771,64 @@ by the Free Software Foundation; or the Artistic License.
 See L<http://dev.perl.org/licenses/> for more information.
 
 =cut
+
+
+=begin comment
+
+The interaction problem between NetSNMP::agent and Perl
+- - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+The root of the problem is in the way Perl manages the lexical variables,
+which is exposed by this short example:
+
+    use strict;
+    use Devel::Peek;
+
+    my @a = ( "hai", 42 );
+
+    for (0..$#a) {
+        my $v = $a[$_];
+        Dump $v;
+    }
+
+which, when executed, produces:
+
+    SV = PV(0x504270) at 0x51f0b0
+      REFCNT = 1
+      FLAGS = (PADBUSY,PADMY,POK,pPOK)
+      PV = 0x511a50 "hai"\0
+      CUR = 3
+      LEN = 4
+    SV = PVIV(0x5050d0) at 0x51f0b0
+      REFCNT = 1
+      FLAGS = (PADBUSY,PADMY,IOK,pIOK)
+      IV = 42
+      PV = 0x511a50 "hai"\0
+      CUR = 3
+      LEN = 4
+
+That is, the fields of the scalar are not erased, and "pollutes" the
+scalar in the next loop, and what was a pure integer (IV) suddenly
+becomes a PVIV. In Perl land, this is not a problem because perl DTRT.
+However, in XS land, one must be more cautious, and the implementation
+of setValue() in NetSNMP::agent (from version 5.0 up to 5.7) is somehow
+incorrect and as a matter of fact can't handle PVIV scalars, throwing
+the delightful "Non-unsigned-integer value passed to setValue" error.
+
+See also this discussion on Perl 5 Porters:
+http://www.nntp.perl.org/group/perl.perl5.porters/2011/08/msg175527.html
+
+A first workaround is to stringify everything. but that's kind of icky.
+
+A second one is to add a level of indirection:
+
+    for my $i (0..$#values) {
+        my $v = \$values[$i];
+        Dump $$v;
+    }
+
+A third one is simply to not use any intermediate lexical variables.
+This solution is the one now used in this module.
+
+=end comment
 
