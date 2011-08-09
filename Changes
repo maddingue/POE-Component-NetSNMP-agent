@@ -4,6 +4,7 @@ Revision history for POE-Component-NetSNMP-agent
         lexicals and the way NetSNMP::agent's setValue() tries to handle more
         than one type of value.
         [FEATURE] New, even simpler API.
+        [TESTS] t/90-pod.t also makes use of Pod::Checker.
 
 0.300   2011.07.18  (SAPER)
         [FEATURE] Added Ping option to automatically recover from a lost
