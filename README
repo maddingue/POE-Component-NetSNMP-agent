@@ -48,6 +48,12 @@ SUPPORT AND DOCUMENTATION
 
     You can also look for information at:
 
+    * Search CPAN
+        http://search.cpan.org/dist/POE-Component-NetSNMP-agent/
+
+    * Meta CPAN
+        https://metacpan.org/release/POE-Component-NetSNMP-agent
+
     * RT: CPAN's request tracker (report bugs here)
         https://rt.cpan.org/Public/Dist/Display.html?Name=POE-Component-NetSNMP-agent
 
@@ -56,9 +62,6 @@ SUPPORT AND DOCUMENTATION
 
     * CPAN Ratings
         http://cpanratings.perl.org/d/POE-Component-NetSNMP-agent
-
-    * Search CPAN
-        http://search.cpan.org/dist/POE-Component-NetSNMP-agent/
 
 
 COPYRIGHT AND LICENSE

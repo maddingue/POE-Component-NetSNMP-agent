@@ -50,6 +50,14 @@ You can also look for information at:
 
 =over
 
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/POE-Component-NetSNMP-agent/>
+
+=item * Meta CPAN
+
+L<https://metacpan.org/release/POE-Component-NetSNMP-agent>
+
 =item * RT: CPAN's request tracker (report bugs here)
 
 L<https://rt.cpan.org/Public/Dist/Display.html?Name=POE-Component-NetSNMP-agent>
@@ -61,10 +69,6 @@ L<http://annocpan.org/dist/POE-Component-NetSNMP-agent>
 =item * CPAN Ratings
 
 L<http://cpanratings.perl.org/d/POE-Component-NetSNMP-agent>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/POE-Component-NetSNMP-agent/>
 
 =back
 
