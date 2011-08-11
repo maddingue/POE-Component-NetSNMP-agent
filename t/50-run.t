@@ -41,7 +41,7 @@ if ($spec eq "unix") {
 plan tests => 7;
 
 use constant {
-    AGENT_OID   => "1.3.6.1.4.1.32272",
+    AGENT_OID   => ".1.3.6.1.4.1.32272",
 };
 
 my $agent = eval { POE::Component::NetSNMP::agent->spawn(

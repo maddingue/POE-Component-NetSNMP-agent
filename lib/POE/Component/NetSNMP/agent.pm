@@ -470,7 +470,7 @@ Like a traditional C<NetSNMP::agent>, made POE aware:
         AgentX  => 1,
     );
 
-    $agent->register("1.3.6.1.4.1.32272", \&agent_handler);
+    $agent->register(".1.3.6.1.4.1.32272", \&agent_handler);
 
     POE::Kernel->run;
     exit;
@@ -507,7 +507,7 @@ Simpler, let the module do the boring stuff, but keep control of the loop:
                 $_[HEAP]{agent} = POE::Component::NetSNMP::agent->spawn(
                     Alias       => "snmp_agent",
                     AgentX      => 1,
-                    AutoHandle  => "1.3.6.1.4.1.32272",
+                    AutoHandle  => ".1.3.6.1.4.1.32272",
                 );
 
                 $_[KERNEL]->yield("update_tree");
@@ -534,7 +534,7 @@ more to do than providing the handlers to update the OID trees:
 
     my $agent = POE::Component::NetSNMP::agent->new(
         AgentX      => 1,
-        AutoHandle  => "1.3.6.1.4.1.32272",
+        AutoHandle  => ".1.3.6.1.4.1.32272",
         AutoUpdate  => [[ \&update_tree, 30 ]],
     );
 
@@ -665,7 +665,7 @@ B<Examples:>
     # create an agent with a single handler, called every 30 sec
     my $agent = POE::Component::NetSNMP::agent->new(
         AgentX      => 1,
-        AutoHandle  => "1.3.6.1.4.1.32272",
+        AutoHandle  => ".1.3.6.1.4.1.32272",
         AutoUpdate  => [[ \&update_tree, 30 ]],
     );
 
@@ -673,7 +673,7 @@ B<Examples:>
     # every 10 and every 20 seconds
     my $agent = POE::Component::NetSNMP::agent->new(
         AgentX      => 1,
-        AutoHandle  => "1.3.6.1.4.1.32272",
+        AutoHandle  => ".1.3.6.1.4.1.32272",
         AutoUpdate  => [
             [ \&update_tree_1, 10 ],
             [ \&update_tree_2, 20 ],
@@ -702,8 +702,8 @@ B<Arguments:>
 
 B<Example:>
 
-    $agent->register("1.3.6.1.4.1.32272.1", \&tree_1_handler);
-    $agent->register("1.3.6.1.4.1.32272.2", \&tree_2_handler);
+    $agent->register(".1.3.6.1.4.1.32272.1", \&tree_1_handler);
+    $agent->register(".1.3.6.1.4.1.32272.2", \&tree_2_handler);
 
 
 =head2 add_oid_entry
@@ -725,9 +725,9 @@ C<NetSNMP::ASN> like C<ASN_COUNTER>, C<ASN_GAUGE>, C<ASN_OCTET_STR>..
 
 B<Example:>
 
-    $agent->add_oid_entry("1.3.6.1.4.1.32272.1", ASN_OCTET_STR, "oh hai");
+    $agent->add_oid_entry(".1.3.6.1.4.1.32272.1", ASN_OCTET_STR, "oh hai");
 
-    $agent->add_oid_entry("1.3.6.1.4.1.32272.2", ASN_OCTET_STR,
+    $agent->add_oid_entry(".1.3.6.1.4.1.32272.2", ASN_OCTET_STR,
         "i can haz oh-eye-deez??");
 
 
@@ -752,8 +752,8 @@ structure:
 B<Example:>
 
     %oid_tree = (
-        "1.3.6.1.4.1.32272.1" => [ ASN_OCTET_STR, "oh hai" ];
-        "1.3.6.1.4.1.32272.2" => [ ASN_OCTET_STR, "i can haz oh-eye-deez??" ];
+        ".1.3.6.1.4.1.32272.1" => [ ASN_OCTET_STR, "oh hai" ];
+        ".1.3.6.1.4.1.32272.2" => [ ASN_OCTET_STR, "i can haz oh-eye-deez??" ];
     );
 
     $agent->add_oid_tree(\%oid_tree);
@@ -779,8 +779,8 @@ name or a coderef
 
 B<Example:>
 
-    POE::Kernel->post($agent, register => "1.3.6.1.4.1.32272.1", "tree_1_handler");
-    POE::Kernel->post($agent, register => "1.3.6.1.4.1.32272.2", "tree_2_handler");
+    POE::Kernel->post($agent, register => ".1.3.6.1.4.1.32272.1", "tree_1_handler");
+    POE::Kernel->post($agent, register => ".1.3.6.1.4.1.32272.2", "tree_2_handler");
 
 
 =head2 add_oid_entry
@@ -803,10 +803,10 @@ C<NetSNMP::ASN> like C<ASN_COUNTER>, C<ASN_GAUGE>, C<ASN_OCTET_STR>..
 B<Example:>
 
     POE::Kernel->post($agent, add_oid_entry =>
-        "1.3.6.1.4.1.32272.1", ASN_OCTET_STR, "oh hai");
+        ".1.3.6.1.4.1.32272.1", ASN_OCTET_STR, "oh hai");
 
     POE::Kernel->post($agent, add_oid_entry =>
-        "1.3.6.1.4.1.32272.2", ASN_OCTET_STR, "i can haz oh-eye-deez??");
+        ".1.3.6.1.4.1.32272.2", ASN_OCTET_STR, "i can haz oh-eye-deez??");
 
 
 =head2 add_oid_tree
@@ -830,8 +830,8 @@ structure:
 B<Example:>
 
     %oid_tree = (
-        "1.3.6.1.4.1.32272.1" => [ ASN_OCTET_STR, "oh hai" ];
-        "1.3.6.1.4.1.32272.2" => [ ASN_OCTET_STR, "i can haz oh-eye-deez??" ];
+        ".1.3.6.1.4.1.32272.1" => [ ASN_OCTET_STR, "oh hai" ];
+        ".1.3.6.1.4.1.32272.2" => [ ASN_OCTET_STR, "i can haz oh-eye-deez??" ];
     );
 
     POE::Kernel->post($agent, add_oid_tree => \%oid_tree);
