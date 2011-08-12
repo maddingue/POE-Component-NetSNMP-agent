@@ -11,6 +11,7 @@ use List::MoreUtils qw< after >;
 use NetSNMP::agent;
 use POE;
 use SNMP ();
+use SNMP::ToolBox;
 
 
 our $VERSION = "0.300";
@@ -221,9 +222,7 @@ sub ev_tree_handler {
         }
         elsif ($mode == MODE_GETNEXT) {
             # find the OID after the requested one
-            my ($next_oid) = after { $_ eq $oid } @$oid_list;
-            $next_oid ||= "";
-            $next_oid ||= @$oid_list[0] unless exists $oid_tree->{$oid};
+            $next_oid find_next_oid($oid);
 
             if (exists $oid_tree->{$next_oid}) {
                 # /!\ no intermediate vars. see comment at end
@@ -410,25 +409,6 @@ sub add_oid_tree {
     POE::Kernel->post($self, add_oid_tree => $new_tree);
 
     return $self
-}
-
-
-# ==============================================================================
-# Functions
-#
-
-
-#
-# by_oid()
-# ------
-# sort() sub-function, for sorting by OID
-#
-sub by_oid ($$) {
-    my (undef, @a) = split /\./, $_[0];
-    my (undef, @b) = split /\./, $_[1];
-    my $v = 0;
-    $v ||= $a[$_] <=> $b[$_] for 0 .. $#a;
-    return $v
 }
 
 
