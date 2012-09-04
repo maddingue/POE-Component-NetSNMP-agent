@@ -222,7 +222,7 @@ sub ev_tree_handler {
         }
         elsif ($mode == MODE_GETNEXT) {
             # find the OID after the requested one
-            $next_oid find_next_oid($oid);
+            my $next_oid = find_next_oid($oid);
 
             if (exists $oid_tree->{$next_oid}) {
                 # /!\ no intermediate vars. see comment at end
