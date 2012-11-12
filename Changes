@@ -3,6 +3,7 @@ Revision history for POE-Component-NetSNMP-agent
         [BUGFIX] Work around a bad interaction between the way Perl handles
         lexicals and the way NetSNMP::agent's setValue() tries to handle more
         than one type of value.
+        [BUGFIX] Fixed add_oid_tree.
         [FEATURE] New, even simpler API.
         [TESTS] t/90-pod.t also makes use of Pod::Checker.
 

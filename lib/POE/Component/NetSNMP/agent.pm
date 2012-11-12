@@ -275,7 +275,7 @@ sub ev_add_oid_tree {
     my $oid_tree = $heap->{oid_tree};
 
     # make sure that the OIDs start with a dot
-    my @oids = map { ".$_" unless index($_, ".") == 0 } keys %$new_tree;
+    my @oids = map { index($_, ".") == 0 ? $_ : ".$_" } keys %$new_tree;
 
     # add the given entries to the tree
     @{$oid_tree}{@oids} = values %$new_tree;
