@@ -168,7 +168,7 @@ sub ev_agent_check {
     # schedule next check
     $kernel->delay(agent_check => $heap->{ping_delay}),
 
-    # process the incoming data and invoque the callback
+    # process the incoming data and invoke the callback
     SNMP::_check_timeout();
     $heap->{agent}->agent_check_and_process(0);
 
