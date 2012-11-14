@@ -4,7 +4,6 @@ META.json
 Build.PL
 Makefile.PL
 README
-README.pod
 Changes
 eg/synopsis-autohandle
 eg/synopsis-coreref
