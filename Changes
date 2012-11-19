@@ -1,5 +1,7 @@
 Revision history for POE-Component-NetSNMP-agent
 
+        [BUGFIX] Correctly check for defined-ness of values (Robert Lemmen).
+
 0.400   2012.11.14  (SAPER)
         [BUGFIX] Work around a bad interaction between the way Perl handles
         lexicals and the way NetSNMP::agent's setValue() tries to handle more

@@ -366,8 +366,8 @@ sub register {
     my ($self, $oid, $callback) = @_;
 
     # check arguments
-    croak "error: no OID defined"       unless $oid;
-    croak "error: no callback defined"  unless $callback;
+    croak "error: no OID defined"       unless defined $oid;
+    croak "error: no callback defined"  unless defined $callback;
     croak "error: callback must be a coderef"
         unless ref $callback and ref $callback eq "CODE";
 
@@ -385,9 +385,9 @@ sub add_oid_entry {
     my ($self, $oid, $type, $value) = @_;
 
     # check arguments
-    croak "error: no OID defined"       unless $oid;
-    croak "error: no type defined"      unless $type;
-    croak "error: no value defined"     unless $value;
+    croak "error: no OID defined"       unless defined $oid;
+    croak "error: no type defined"      unless defined $type;
+    croak "error: no value defined"     unless defined $value;
 
     # register the given OID and callback
     POE::Kernel->post($self, add_oid_entry => $oid, $type, $value);
