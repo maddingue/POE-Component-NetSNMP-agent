@@ -550,7 +550,7 @@ C<post>ing to C<agent_check>;
 
 Note that most of the API is available both as POE events and as object
 methods, in an attempt to make it a bit easier for people not fully used
-to POE.
+to event programming with POE.
 
 This module can use C<Sort::Key::OID> when it is available, for sorting
 OIDs faster than with the internal pure Perl function.
@@ -858,6 +858,17 @@ L<http://annocpan.org/dist/POE-Component-NetSNMP-agent>
 L<http://cpanratings.perl.org/d/POE-Component-NetSNMP-agent>
 
 =back
+
+
+=head1 CAVEATS
+
+A known issue with this module is that if the snmpd daemon it is connected
+to dies, the default POE loop will spin over the half-closed Unix socket,
+eating 100% of CPU. However, this problem can be worked around by selecting
+an alternative loop like AnyEvent, EV or EPoll (the other loops have the
+same bug).
+
+L<https://github.com/maddingue/POE-Component-NetSNMP-agent/issues/1>
 
 
 =head1 BUGS
