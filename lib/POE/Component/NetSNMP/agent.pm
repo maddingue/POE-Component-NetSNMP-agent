@@ -481,15 +481,15 @@ Simpler, let the module do the boring stuff, but keep control of the loop:
     use POE qw< Component::NetSNMP::agent >;
 
 
+    my $agent = POE::Component::NetSNMP::agent->new(
+        Alias       => "snmp_agent",
+        AgentX      => 1,
+        AutoHandle  => ".1.3.6.1.4.1.32272",
+    );
+
     POE::Session->create(
         inline_states => {
             _start => sub {
-                $_[HEAP]{agent} = POE::Component::NetSNMP::agent->spawn(
-                    Alias       => "snmp_agent",
-                    AgentX      => 1,
-                    AutoHandle  => ".1.3.6.1.4.1.32272",
-                );
-
                 $_[KERNEL]->yield("update_tree");
             },
             update_tree => \&update_tree,
