@@ -739,6 +739,10 @@ B<Example:>
     $agent->add_oid_tree(\%oid_tree);
 
 
+=head2 heap
+
+Access the heap dedicated to update handlers.
+
 
 =head1 POE EVENTS
 
@@ -864,7 +868,8 @@ L<http://cpanratings.perl.org/d/POE-Component-NetSNMP-agent>
 
 A known issue with this module is that if the snmpd daemon it is connected
 to dies, the default POE loop will spin over the half-closed Unix socket,
-eating 100% of CPU. However, this problem can be worked around by selecting
+eating 100% of CPU until the daemon is restarted and the sub-agent has
+reconnected. However, this problem can be worked around by selecting
 an alternative loop like AnyEvent, EV or EPoll (the other loops have the
 same bug).
 
