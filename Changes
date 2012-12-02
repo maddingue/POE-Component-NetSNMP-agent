@@ -1,5 +1,6 @@
 Revision history for POE-Component-NetSNMP-agent
 
+0.500   2012.12.02  (SAPER)
         [BUGFIX] Correctly check for defined-ness of values (Robert Lemmen).
         [DOC] Add a CAVEATS section to document the known problems.
 
