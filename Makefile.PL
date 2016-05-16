@@ -11,6 +11,8 @@ WriteMakefile(
     ABSTRACT_FROM       => 'lib/POE/Component/NetSNMP/agent.pm',
     PREREQ_PM => {
         # prereqs
+        'Carp'              => 0,
+        'List::MoreUtils'   => 0,
         'NetSNMP::agent'    => 5.0000,
         'parent'            => 0,
         'POE'               => 0.3502,
