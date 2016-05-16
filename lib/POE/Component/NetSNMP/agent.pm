@@ -14,7 +14,7 @@ use SNMP ();
 use SNMP::ToolBox;
 
 
-our $VERSION = "0.500";
+our $VERSION = "0.600";
 
 
 use constant {
@@ -434,7 +434,7 @@ POE::Component::NetSNMP::agent - AgentX clients with NetSNMP::agent and POE
 
 =head1 VERSION
 
-Version 0.500
+Version 0.600
 
 
 =head1 SYNOPSIS
